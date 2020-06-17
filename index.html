@@ -1,0 +1,51 @@
+<html>
+    <head>
+        <!-- probably unnecessary:  -->
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/0.7.5/webcomponents-lite.min.js"></script> -->
+        <script src='vendor/term.js'></script>
+        <script src='vendor/tty-player.js'></script>
+        <style type='text/css'>
+            .invis { display: none; }
+            body { margin: 0; padding: 0; }
+            #ttyrec-container { margin: auto; }
+        </style>
+    </head>
+    <body>
+        <div id='ttyrec-container'></div>
+
+        <p id='ttyrec-dialog'>
+            Load ttyrec:
+            <input type="file" id="ttyrec-select" />
+        </p>
+        <script type="text/javascript">
+            function ttyrec_from_file(evt) {
+                load_ttyrec(evt.target.files[0]);
+            }
+
+            function load_ttyrec(file) {
+                const reader = new FileReader();
+                reader.onload = function (readEvt) { play_ttyrec(readEvt.target.result); }
+                reader.readAsDataURL(file);
+            }
+            
+            function play_ttyrec(rec) {
+                const ttyrec_container = document.getElementById('ttyrec-container');
+                const ttyrec_el = document.createElement('tty-player');
+                ttyrec_el.src = rec;
+                ttyrec_el.controls = true;
+                ttyrec_container.appendChild(ttyrec_el);
+            }
+
+            // Were we passed a ttyrec in window.name?
+            if (window.name && window.name.slice(0,7) === 'ttyrec=') {
+                const ttyrecBStr = atob(window.name.slice(7));
+                const ttyrecArr = new Uint8Array(ttyrecBStr.split('').map(x=>x.charCodeAt(0)));
+                const ttyrec = new Blob([ttyrecArr]);
+                document.getElementById('ttyrec-dialog').className = 'invis';
+                load_ttyrec(ttyrec);
+            }
+
+            document.getElementById('ttyrec-select').addEventListener('change', ttyrec_from_file);
+        </script>
+    </body>
+</html>
